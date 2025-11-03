@@ -1,6 +1,7 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DietGeneratorService } from './services/diet-generator.service';
+import { DietStateService } from './services/diet-state.service';
 import { DietTable } from './diet-table/diet-table';
 import { Recipe } from '../../shared/models/recipe';
 
@@ -18,7 +19,7 @@ interface DayMeals {
   styleUrl: './diets.scss',
   standalone: true
 })
-export class Diets {
+export class Diets implements OnInit {
   loading = false;
   error: string | null = null;
   weekPlan: DayMeals[] = [];
@@ -29,8 +30,15 @@ export class Diets {
   constructor(
     private router: Router, 
     private dietGen: DietGeneratorService,
+    private dietState: DietStateService,
     private cdr: ChangeDetectorRef
   ) {}
+
+  ngOnInit() {
+    // Restaurar el plan de la semana si existe
+    this.weekPlan = this.dietState.getWeekPlan();
+    this.cdr.detectChanges();
+  }
 
   viewRecipe(recipeId: string | number) {
     this.router.navigate(['/diets/recipe', recipeId]);
@@ -45,6 +53,7 @@ export class Diets {
     this.dietGen.generateDiet().subscribe({
       next: (recipes) => {
         this.weekPlan = this.distributeRecipes(recipes);
+        this.dietState.setWeekPlan(this.weekPlan); // Guardar en el servicio
         this.loading = false;
         this.cdr.detectChanges();
       },

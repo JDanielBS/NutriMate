@@ -23,19 +23,14 @@ export class RecipeDetail implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('RecipeDetail ngOnInit llamado');
     const recipeId = this.route.snapshot.paramMap.get('id');
-    console.log('Recipe ID desde ruta:', recipeId);
     
     if (recipeId) {
-      console.log('Cargando receta con ID:', Number(recipeId));
       this.recipeService.getRecipeById(Number(recipeId)).subscribe({
         next: (recipe) => {
-          console.log('Receta recibida:', recipe);
           this.recipe = recipe;
           this.loading = false;
-          this.cdr.detectChanges(); // Forzar detección de cambios
-          console.log('Vista actualizada - loading:', this.loading, 'recipe:', !!this.recipe);
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error cargando receta:', error);
@@ -44,7 +39,6 @@ export class RecipeDetail implements OnInit {
         }
       });
     } else {
-      console.warn('No se encontró ID en la ruta');
       this.loading = false;
       this.cdr.detectChanges();
     }
